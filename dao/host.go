@@ -6,8 +6,8 @@ import "github.com/funnyang/jump/model"
 func (d *Dao) MatchHost(keyword string) (hosts []model.Host, err error) {
 	keyword = "%" + keyword + "%"
 	err = d.db.Where("id like ?", keyword).
-		Or("host like ?", keyword).
-		Or("port like ?", keyword).
+		Or("hostname like ?", keyword).
+		Or("ip like ?", keyword).
 		Or("Desc like ?", keyword).Find(&hosts).Error
 	return
 }
@@ -15,7 +15,8 @@ func (d *Dao) MatchHost(keyword string) (hosts []model.Host, err error) {
 // ExactMatchHost 基于关键字精确匹配
 func (d *Dao) ExactMatchHost(keyword string) (hosts []model.Host, err error) {
 	err = d.db.Where("id = ?", keyword).
-		Or("host = ?", keyword).Find(&hosts).Error
+		Or("hostname = ?", keyword).
+		Or("ip = ?", keyword).Find(&hosts).Error
 	return
 }
 
@@ -41,6 +42,6 @@ func (d *Dao) UpdateHost(host model.Host) error {
 
 // GetHost 查询host
 func (d *Dao) GetHost(id int) (host model.Host, err error) {
-	err = d.db.First(&host).Error
+	err = d.db.Where("id = ?", id).First(&host).Error
 	return
 }

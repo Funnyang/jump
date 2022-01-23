@@ -147,13 +147,22 @@ func (it *InteractiveTerminal) editMode(cmd string) {
 }
 
 func scanHost(host *model.Host) {
+	// 主机名
+	fmt.Printf("请输入主机名称: ")
+	fmt.Scanln(&host.Hostname)
+	host.Hostname = strings.TrimSpace(host.Hostname)
+	for host.Hostname == "" {
+		fmt.Printf("请输入主机名称: ")
+		fmt.Scanln(&host.Hostname)
+	}
+
 	// ip
-	fmt.Printf("请输入主机Host: ")
-	fmt.Scanln(&host.Host)
-	host.Host = strings.TrimSpace(host.Host)
-	for host.Host == "" {
-		fmt.Printf("请输入主机Host: ")
-		fmt.Scanln(&host.Host)
+	fmt.Printf("请输入主机ip: ")
+	fmt.Scanln(&host.IP)
+	host.IP = strings.TrimSpace(host.IP)
+	for host.IP == "" {
+		fmt.Printf("请输入主机ip: ")
+		fmt.Scanln(&host.IP)
 	}
 
 	// 端口
@@ -258,14 +267,14 @@ func PrintHosts(hosts []model.Host) {
 
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"序号", "主机", "端口", "说明"})
+	t.AppendHeader(table.Row{"序号", "主机名", "IP", "说明"})
 
 	rows := make([]table.Row, 0, len(hosts))
 	for _, host := range hosts {
 		rows = append(rows, table.Row{
 			color.YellowString(strconv.Itoa(host.ID)),
-			host.Host,
-			host.Port,
+			host.Hostname,
+			fmt.Sprintf("%s:%d", host.IP, host.Port),
 			host.Desc,
 		})
 	}

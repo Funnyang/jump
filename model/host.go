@@ -4,7 +4,8 @@ import "time"
 
 type Host struct {
 	ID               int       // id
-	Host             string    // 主机ip
+	Hostname         string    // 主机名
+	IP               string    // 主机ip
 	Port             int       // 端口
 	User             string    // 用户
 	Password         string    // 密码

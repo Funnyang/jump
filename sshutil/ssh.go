@@ -47,7 +47,7 @@ func NewSSHClient(host model.Host) (*SSHClient, error) {
 	}
 
 	//dial 获取ssh client
-	addr := fmt.Sprintf("%s:%d", host.Host, host.Port)
+	addr := fmt.Sprintf("%s:%d", host.IP, host.Port)
 	sshClient, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
 		return nil, err

@@ -13,7 +13,7 @@ func TestGetDB(t *testing.T) {
 
 func TestInsertHost(t *testing.T) {
 	var host = model.Host{
-		Host:     "127.0.0.1",
+		IP:       "127.0.0.1",
 		Port:     22,
 		User:     "zz",
 		Password: "123456",
