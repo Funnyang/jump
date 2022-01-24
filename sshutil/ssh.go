@@ -163,7 +163,7 @@ func (sc *SSHClient) Ssh() {
 				// keyCtrlD
 				if buf[n-1] == 4 {
 					// 目前只能通过睡眠退出
-					time.Sleep(time.Millisecond * 50)
+					time.Sleep(time.Millisecond * 200)
 					if ctx.Err() != nil {
 						return
 					}
