@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"fmt"
+	"github.com/funnyang/jump/pkg/screen"
+	sshutil2 "github.com/funnyang/jump/pkg/sshutil"
 	"io"
 	"os"
 	"strconv"
@@ -13,7 +15,6 @@ import (
 	"github.com/funnyang/jump/conf"
 	"github.com/funnyang/jump/model"
 	"github.com/funnyang/jump/service"
-	"github.com/funnyang/jump/sshutil"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"golang.org/x/term"
 	"gorm.io/gorm"
@@ -54,7 +55,11 @@ func (it *InteractiveTerminal) init() (err error) {
 		return
 	}
 
-	it.myTerm = term.NewTerminal(os.Stdin, prompt)
+	c := struct {
+		io.Reader
+		io.Writer
+	}{screen.StdinReader, os.Stdout}
+	it.myTerm = term.NewTerminal(c, prompt)
 	return
 }
 
@@ -229,7 +234,7 @@ func (it *InteractiveTerminal) JumpHost(keyword string) {
 	}
 	if len(hosts) == 1 {
 		// ssh
-		sshutil.Ssh(hosts[0])
+		sshutil2.Ssh(hosts[0])
 		return
 	}
 
@@ -242,7 +247,7 @@ func (it *InteractiveTerminal) JumpHost(keyword string) {
 
 	if len(hosts) == 1 {
 		// ssh
-		sshutil.Ssh(hosts[0])
+		sshutil2.Ssh(hosts[0])
 	} else {
 		PrintHosts(hosts)
 	}

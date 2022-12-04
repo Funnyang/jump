@@ -2,7 +2,9 @@ package sshutil
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/funnyang/jump/pkg/screen"
 	"io"
 	"io/ioutil"
 	"log"
@@ -111,7 +113,7 @@ func (sc *SSHClient) Ssh() {
 	defer session.Close()
 
 	// Set up terminal modes
-	//使用VT100终端来实现tab键提示，上下键查看历史命令，clear键清屏等操作
+	// 使用VT100终端来实现tab键提示，上下键查看历史命令，clear键清屏等操作
 	c := console.Current()
 	if err := c.SetRaw(); err != nil {
 		log.Println(err)
@@ -125,46 +127,31 @@ func (sc *SSHClient) Ssh() {
 	go listenWindowChange(ctx, session, c)
 
 	// 启动一个异步的管道式复制
-	var (
-		pipStdIn  io.WriteCloser
-		pipStdout io.Reader
-		pipStderr io.Reader
-	)
+	var pipStdIn io.WriteCloser
 	if pipStdIn, err = session.StdinPipe(); err != nil {
 		log.Println("ssh: ", err)
 	}
-	if pipStdout, err = session.StdoutPipe(); err != nil {
-		log.Println("ssh: ", err)
-	}
-	if pipStderr, err = session.StderrPipe(); err != nil {
-		log.Println("ssh: ", err)
-	}
 
-	go io.Copy(os.Stderr, pipStderr)
-	go io.Copy(os.Stdout, pipStdout)
+	session.Stdout = screen.StdoutWriter
+	session.Stderr = screen.StderrWriter
 	go func() {
 		buf := make([]byte, 128)
 		for {
-			if ctx.Err() != nil {
+			select {
+			case <-ctx.Done():
 				return
-			}
-			n, err := os.Stdin.Read(buf)
-			if err != nil {
-				log.Println("stdin read: ", err)
-				return
-			}
-			if n > 0 {
-				_, err = pipStdIn.Write(buf[:n])
+			default:
+				n, err := screen.StdinReader.Read(buf)
 				if err != nil {
-					log.Println("stdin write: ", err)
+					log.Println("stdin read: ", err)
 					return
 				}
-
-				// keyCtrlD
-				if buf[n-1] == 4 {
-					// 目前只能通过睡眠退出
-					time.Sleep(time.Millisecond * 200)
-					if ctx.Err() != nil {
+				if n > 0 {
+					_, err = pipStdIn.Write(buf[:n])
+					if err != nil {
+						if errors.Is(err, io.EOF) {
+							screen.StdinWriter.Write(buf[:n])
+						}
 						return
 					}
 				}
