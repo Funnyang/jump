@@ -123,15 +123,13 @@ func (it *InteractiveTerminal) editMode(cmd string) {
 		srv.InsertHost(host)
 	case "d":
 		var id int
-		fmt.Printf("请输入主机ID: ")
-		fmt.Scanln(&id)
+		scanIntValue("请输入主机ID", &id)
 		if err := srv.DeleteHost(id); err != nil {
 			fmt.Println("删除失败: ", err)
 		}
 	case "u":
 		var id int
-		fmt.Printf("请输入主机ID: ")
-		fmt.Scanln(&id)
+		scanIntValue("请输入主机ID", &id)
 		host, err := srv.GetHost(id)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -151,61 +149,55 @@ func (it *InteractiveTerminal) editMode(cmd string) {
 	}
 }
 
+func scanStringValue(tip string, value *string) {
+	fmt.Printf("%s: ", tip)
+	fmt.Fscanln(screen.StdinReader, value)
+	*value = strings.TrimSpace(*value)
+}
+
+func scanIntValue(tip string, value *int) {
+	fmt.Printf("%s: ", tip)
+	fmt.Fscanln(screen.StdinReader, value)
+}
+
 func scanHost(host *model.Host) {
 	// 主机名
-	fmt.Printf("请输入主机名称: ")
-	fmt.Scanln(&host.Hostname)
-	host.Hostname = strings.TrimSpace(host.Hostname)
+	scanStringValue("请输入主机名称", &host.Hostname)
 	for host.Hostname == "" {
-		fmt.Printf("请输入主机名称: ")
-		fmt.Scanln(&host.Hostname)
+		scanStringValue("请输入主机名称", &host.Hostname)
 	}
 
 	// ip
-	fmt.Printf("请输入主机ip: ")
-	fmt.Scanln(&host.IP)
-	host.IP = strings.TrimSpace(host.IP)
+	scanStringValue("请输入主机ip", &host.IP)
 	for host.IP == "" {
-		fmt.Printf("请输入主机ip: ")
-		fmt.Scanln(&host.IP)
+		scanStringValue("请输入主机ip", &host.IP)
 	}
 
 	// 端口
-	fmt.Printf("请输入主机端口(22): ")
-	fmt.Scanln(&host.Port)
+	scanIntValue("请输入主机端口(22)", &host.Port)
 	if host.Port == 0 {
 		host.Port = 22
 	}
 
 	// 用户名
-	fmt.Printf("请输入登录用户名(root): ")
-	fmt.Scanln(&host.User)
-	host.User = strings.TrimSpace(host.User)
+	scanStringValue("请输入登录用户名(root)", &host.User)
 	if host.User == "" {
 		host.User = "root"
 	}
 
 	// 密码
-	fmt.Printf("请输入登录密码(不填则使用私钥登录): ")
-	fmt.Scanln(&host.Password)
-	host.Password = strings.TrimSpace(host.Password)
+	scanStringValue("请输入登录密码(不填则使用私钥登录)", &host.Password)
 	if host.Password == "" {
 		// 私钥
-		fmt.Printf("请输入私钥(不填则使用默认私钥): ")
-		fmt.Scanln(&host.PrivateKey)
-		host.PrivateKey = strings.TrimSpace(host.PrivateKey)
+		scanStringValue("请输入私钥(不填则使用默认私钥)", &host.PrivateKey)
 		if host.PrivateKey != "" {
 			// 私钥密码
-			fmt.Printf("请输入私钥密码: ")
-			fmt.Scanln(&host.PrivateKeyPhrase)
-			host.PrivateKeyPhrase = strings.TrimSpace(host.PrivateKeyPhrase)
+			scanStringValue("请输入私钥密码", &host.PrivateKeyPhrase)
 		}
 	}
 
-	// 私钥密码
-	fmt.Printf("请输入主机描述: ")
-	fmt.Scanln(&host.Desc)
-	host.Desc = strings.TrimSpace(host.Desc)
+	// 主机描述
+	scanStringValue("请输入主机描述", &host.Desc)
 }
 
 // enterEditState 进入编辑状态
