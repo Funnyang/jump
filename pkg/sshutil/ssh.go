@@ -11,6 +11,8 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -73,8 +75,13 @@ func getAuth(host model.Host) (auths []ssh.AuthMethod, err error) {
 	var signer ssh.Signer
 	var key []byte
 	if host.PrivateKey != "" {
-		if fileutil.ExistPath(host.PrivateKey) {
-			key, err = os.ReadFile(host.PrivateKey)
+		var keyPath string
+		if strings.HasPrefix(host.PrivateKey, "~/") {
+			dirname, _ := os.UserHomeDir()
+			keyPath = filepath.Join(dirname, host.PrivateKey[2:])
+		}
+		if fileutil.ExistPath(keyPath) {
+			key, err = os.ReadFile(keyPath)
 			if err != nil {
 				return nil, err
 			}
