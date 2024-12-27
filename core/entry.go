@@ -189,7 +189,7 @@ func scanHost(host *model.Host) {
 	scanStringValue("请输入登录密码(不填则使用私钥登录)", &host.Password)
 	if host.Password == "" {
 		// 私钥
-		scanStringValue("请输入私钥(不填则使用默认私钥)", &host.PrivateKey)
+		scanStringValue("请输入私钥, 支持输入文件路径 (不填则使用默认私钥)", &host.PrivateKey)
 		if host.PrivateKey != "" {
 			// 私钥密码
 			scanStringValue("请输入私钥密码", &host.PrivateKeyPhrase)

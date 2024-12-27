@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"github.com/funnyang/jump/pkg/fileutil"
 	"os"
 	"path"
 
@@ -40,7 +41,7 @@ func getDB(dbPath string) *gorm.DB {
 	}
 
 	// 数据库是否已存在
-	exist := existPath(dbPath)
+	exist := fileutil.ExistPath(dbPath)
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		panic(fmt.Sprintf("连接数据库失败: %s", dbPath))

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/funnyang/jump/pkg/fileutil"
 	"github.com/funnyang/jump/pkg/screen"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
@@ -73,15 +73,22 @@ func getAuth(host model.Host) (auths []ssh.AuthMethod, err error) {
 	var signer ssh.Signer
 	var key []byte
 	if host.PrivateKey != "" {
-		// 使用保存的私钥登陆
-		key = []byte(host.PrivateKey)
+		if fileutil.ExistPath(host.PrivateKey) {
+			key, err = os.ReadFile(host.PrivateKey)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			// 使用保存的私钥登陆
+			key = []byte(host.PrivateKey)
+		}
 	} else {
 		// 使用默认的私钥登陆
 		homePath, err := os.UserHomeDir()
 		if err != nil {
 			return nil, err
 		}
-		key, err = ioutil.ReadFile(path.Join(homePath, ".ssh", "id_rsa"))
+		key, err = os.ReadFile(path.Join(homePath, ".ssh", "id_rsa"))
 		if err != nil {
 			return nil, err
 		}
